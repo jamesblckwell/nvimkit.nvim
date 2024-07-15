@@ -108,7 +108,7 @@ M.setup = function(opts)
 
     M._config = merge_tables(M._default_config, opts)
 
-    vim.api.nvim_create_user_command("NvimkitCreateRoute", "lua require('nvimkit').CreateRoute()",
+    vim.api.nvim_create_user_command("NvimkitCreateRoute", "lua require('nvimkit').create_route()",
         { desc = "Create a new sveltkit route" })
 end
 
