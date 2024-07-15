@@ -20,24 +20,30 @@ M._default_config = {
 
 M._config = nil;
 
+-- checks if the setup function has been called, by seeing if the
+-- _config variable is set
 local check_setup = function()
     return M._config ~= nil
 end
 
+-- checks if a directory exists
 local check_dir_exists = function(path)
     return vim.fn.isdirectory(path) ~= 0
 end
 
+-- checks if a file exists
 local file_exists = function(path)
     return vim.fn.filereadable(path) ~= 0
 end
 
+-- merges two tables together, see: https://stackoverflow.com/a/1283399
 local merge_tables = function(t1, t2)
     for k, v in pairs(t2) do t1[k] = v end
     return t1
 end
 
 local create_file = function(path, route_file)
+    -- TODO Strip this out
     if M._config["mode"] == "debug" then
         print("Svelte Root: ", path)
         print("Filename: ", route_file)
@@ -108,6 +114,7 @@ M.setup = function(opts)
 
     M._config = merge_tables(M._default_config, opts)
 
+    -- TODO let users pass the route filetype and route name in the function
     vim.api.nvim_create_user_command("NvimkitCreateRoute", "lua require('nvimkit').create_route()",
         { desc = "Create a new sveltkit route" })
 end

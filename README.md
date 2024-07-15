@@ -9,9 +9,9 @@ Use your favourite plugin manager to install Nvimkit.nvim.
 ### Lazy.nvim
 
 ```lua
-    { "jamesblckwell/nvimkit.nvim", opts = {} }
+{ "jamesblckwell/nvimkit.nvim", opts = {} }
 ```
 
 ## Documentation
 
-See ':help nvimkit'
+See :help nvimkit
