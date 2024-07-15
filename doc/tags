@@ -1,0 +1,5 @@
+nvimkit	nvimkit.txt	/*nvimkit*
+nvimkit-config	nvimkit.txt	/*nvimkit-config*
+nvimkit-functions	nvimkit.txt	/*nvimkit-functions*
+nvimkit.create_route()	nvimkit.txt	/*nvimkit.create_route()*
+nvimkit.setup()	nvimkit.txt	/*nvimkit.setup()*

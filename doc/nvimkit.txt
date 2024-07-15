@@ -1,0 +1,76 @@
+=============================================================================
+                                                                     *nvimkit*
+
+NvimKit - This plugin provides a helper function to create new Sveltekit
+routes.
+
+=============================================================================
+
+                                                              *nvimkit-config*
+1. Configuration
+
+nvimkit can be configured by passing the following opts into the setup
+function. (See |nvimkit.setup|). 
+
+    mode: string {"prod" | "debug"}
+        The mode in which the plugin should run. Default is "prod".
+
+    svelte_route_dirname: string
+        The route directory in the Sveltekit project. Default is "/src/routes".
+
+    route_filetypes: table
+        The filetypes that can be created for a route. See
+        |nvimkit.create_route| for more details.
+
+    Default configuration is as follows:
+    
+    default_config = {
+        mode = "prod",
+        svelte_root_dirname = "/src/routes/",
+        route_filetypes = {
+            "+page.svelte",
+            "+page.ts",
+            "+page.server.ts",
+            "+server.ts",
+            "+layout.svelte",
+            "+layout.ts",
+            "+layout.server.ts",
+            "+error.svelte",
+        }
+    }
+
+=============================================================================
+
+
+                                                           *nvimkit-functions*
+2. Functions
+
+                                                      *nvimkit.create_route()*
+nvimkit.create_route({route}, {filetype})
+
+    Create a new Sveltekit route {filetype} for a particular {route}. Left
+    blank, the command will prompt for the route and filetype. The assumed
+    default filetypes are:
+        +page.svelte
+        +page.ts
+        +page.server.ts
+        +server.ts
+        +layout.svelte
+        +layout.ts
+        +layout.server.ts
+        +error.svelte
+    (See https://kit.svelte.dev/docs/routing)
+    
+    The function first checks if the route already exists. If it does not, 
+    it will create the route and the necessary directory. If the route 
+    already exists, it will simply create the route file. It then checks if
+    the route file already exists. The function will not overwrite an existing
+    route file.
+    
+                                                             *nvimkit.setup()*
+nvimkit.setup({opts})
+
+    Setup the nvimkit plugin. See |nvimkit-config| for available options.
+
+=============================================================================
+vim:tw=78:ts=8:ft=help:norl:
