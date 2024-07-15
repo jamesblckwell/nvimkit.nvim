@@ -5,7 +5,7 @@ local M = {}
 
 M._default_config = {
     mode = "prod",
-    svelte_route_dirname = "/src/routes/",
+    svelte_route_dirname = "/src/routes",
     route_filetypes = {
         "+page.svelte",
         "+page.ts",
@@ -70,17 +70,19 @@ local create_file = function(path, route_file)
 end
 
 
-M.create_route = function(route, filename)
+M.create_route = function(args)
+    print(vim.inspect(args))
+
     if check_setup() == false then
         print("Error: Setup not called")
         return
     end
 
     local cwd = vim.fn.getcwd()
-    local svelte_root = cwd .. M._config["svelte_route_dirname"] .. "/"
+    local svelte_root = cwd .. M._config["svelte_route_dirname"]
 
     if check_dir_exists(svelte_root) == false then
-        error("Error: Svelte root directory not found: " .. cwd .. M._config["svelte_route_dirname"] .. "/", 0)
+        error("Error: Svelte root directory not found: " .. cwd .. M._config["svelte_route_dirname"], 0)
         return
     end
 
@@ -100,8 +102,16 @@ M.create_route = function(route, filename)
         filename = M._config["route_filetypes"][filename_index]
     end
 
+    -- exit gracefully when a user doesn't select a filetype
+    if filename_index == 0 then
+        return
+    end
+
     if route == nil then
-        route = vim.fn.input("Enter the route: ")
+        route = vim.fn.input("Enter the route (empty for routes root, or q to cancel): ", "", "file")
+        if route == "q" then
+            return
+        end
     end
 
     create_file(svelte_root .. route, filename)
@@ -114,9 +124,12 @@ M.setup = function(opts)
 
     M._config = merge_tables(M._default_config, opts)
 
-    -- TODO let users pass the route filetype and route name in the function
+    -- TODO let users pass the route filetype and route name in the Ex function
     vim.api.nvim_create_user_command("NvimkitCreateRoute", "lua require('nvimkit').create_route()",
         { desc = "Create a new sveltkit route" })
 end
+
+M.setup()
+M.create_route()
 
 return M
