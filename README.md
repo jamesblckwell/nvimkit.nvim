@@ -2,6 +2,6 @@
 
 Easily create Sveltekit routes with a single command.
 
-## Documentations
+## Documentation
 
 See ':help nvimkit'
