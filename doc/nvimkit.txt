@@ -5,7 +5,6 @@ NvimKit - This plugin provides a helper function to create new Sveltekit
 routes.
 
 =============================================================================
-
                                                               *nvimkit-config*
 1. Configuration
 
@@ -18,6 +17,16 @@ function. (See |nvimkit.setup|).
     svelte_route_dirname: string
         The route directory in the Sveltekit project. Default is "/src/routes".
 
+    open_file_after_creation: boolean
+        Whether to open the created file after creation. Default is true.
+
+    open_file_split_direction: string { "right" | "left" | "above" | "below" }
+        The direction in which to open the file. Default is "right".
+        See |:vsplit| and |:split| for more details.
+
+    ts_or_js: string {"ts" | "js"}
+        The file extension to use for the route files. Default is "ts".
+
     route_filetypes: table
         The filetypes that can be created for a route. See
         |nvimkit.create_route| for more details.
@@ -26,22 +35,13 @@ function. (See |nvimkit.setup|).
     
     default_config = {
         mode = "prod",
-        svelte_root_dirname = "/src/routes/",
-        route_filetypes = {
-            "+page.svelte",
-            "+page.ts",
-            "+page.server.ts",
-            "+server.ts",
-            "+layout.svelte",
-            "+layout.ts",
-            "+layout.server.ts",
-            "+error.svelte",
-        }
+        svelte_route_dirname = "/src/routes",
+        open_file_after_creation = true,
+        open_file_split_direction = "right",
+        ts_or_js = "ts",
     }
 
 =============================================================================
-
-
                                                            *nvimkit-functions*
 2. Functions
 
@@ -66,7 +66,7 @@ nvimkit.create_route({route}, {filetype})
     already exists, it will simply create the route file. It then checks if
     the route file already exists. The function will not overwrite an existing
     route file.
-    
+
                                                              *nvimkit.setup()*
 nvimkit.setup({opts})
 
