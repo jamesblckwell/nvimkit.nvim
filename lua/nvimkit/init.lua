@@ -1,24 +1,39 @@
 local M = {}
 
--- TODO - Add a way to switch between js/ts filetypes
+-- TODO - add ability to split buffer
 -- TODO - add option to template the files?
+
+M._jsFiletypes = {
+    "+page.svelte",
+    "+page.js",
+    "+page.server.js",
+    "+server.js",
+    "+layout.svelte",
+    "+layout.js",
+    "+layout.server.js",
+    "+error.svelte",
+}
+
+M._tsFiletypes = {
+    "+page.svelte",
+    "+page.ts",
+    "+page.server.ts",
+    "+server.ts",
+    "+layout.svelte",
+    "+layout.ts",
+    "+layout.server.ts",
+    "+error.svelte",
+}
 
 M._default_config = {
     mode = "prod",
     svelte_route_dirname = "/src/routes",
-    route_filetypes = {
-        "+page.svelte",
-        "+page.ts",
-        "+page.server.ts",
-        "+server.ts",
-        "+layout.svelte",
-        "+layout.ts",
-        "+layout.server.ts",
-        "+error.svelte",
-    }
+    open_file_split_direction = "right",
+    open_file_after_creation = true,
+    ts_or_js = "ts",
 }
 
-M._config = nil;
+M._config = nil
 
 -- checks if the setup function has been called, by seeing if the
 -- _config variable is set
@@ -42,37 +57,61 @@ local merge_tables = function(t1, t2)
     return t1
 end
 
-local create_file = function(path, route_file)
-    -- TODO Strip this out
-    if M._config["mode"] == "debug" then
-        print("Svelte Root: ", path)
-        print("Filename: ", route_file)
-        print("Full Path: ", path .. "/" .. route_file)
-        print("Config: ", vim.inspect(M._config))
+-- Generate route options for the user to select from
+local generate_route_options = function()
+    local options = { "Select the desired filetype: (or 0 to just create the route directory)" }
+    for i, v in ipairs(M._config["route_filetypes"]) do
+        table.insert(options, i .. ". " .. v)
     end
+    return options
+end
 
+local create_file = function(path, route_file)
     if check_dir_exists(path) == false then
         vim.fn.mkdir(path, "p")
     end
 
-    if file_exists(path .. "/" .. route_file) == true then
-        print("\nError: File already exists: ", path .. "/" .. route_file)
+    local route_filepath = path .. "/" .. route_file
+
+    if file_exists(route_filepath) == true then
+        print("\nError: File already exists: ", route_filepath)
         return
     end
 
-    local file = io.open(path .. "/" .. route_file, "w")
-    if file == nil then
-        print("Error: Could not create file: ", path)
-        return
+    local template_set = M._templates[M._config["ts_or_js"]]
+    local template = template_set[route_file]
+    if template == nil then
+        template = ""
     end
-    file:write("")
+
+    local file = assert(
+        io.open(route_filepath, "w"),
+        "Error: Could not open file for writing: " .. route_filepath
+    )
+    file:write(template)
     file:close()
+
+    if M._config["open_file_after_creation"] == true then
+        -- Create buffer
+        local buffer = vim.api.nvim_create_buf(true, false);
+        -- Set buffer name to the route filepath
+        vim.api.nvim_buf_set_name(buffer, route_filepath)
+        -- Load the file into the buffer
+        vim.api.nvim_buf_call(buffer, function()
+            vim.cmd.edit(route_filepath)
+        end)
+        -- Open the buffer in a split window
+        vim.api.nvim_open_win(buffer, true, {
+            split = M._config["open_file_split_direction"],
+            win = 0,
+        })
+    end
 end
 
+M.create_route = function()
+    local options = generate_route_options()
 
-M.create_route = function(args)
-    print(vim.inspect(args))
-
+    local filename, route = nil, nil
     if check_setup() == false then
         print("Error: Setup not called")
         return
@@ -82,23 +121,14 @@ M.create_route = function(args)
     local svelte_root = cwd .. M._config["svelte_route_dirname"]
 
     if check_dir_exists(svelte_root) == false then
-        error("Error: Svelte root directory not found: " .. cwd .. M._config["svelte_route_dirname"], 0)
+        error("Error: Svelte root directory not found: " .. svelte_root, 0)
         return
     end
 
-    local filename_index = vim.fn.inputlist({
-        "Select the desired filetype: (or 0 to just create the route directory)",
-        "1. +page.svelte",
-        "2. +page.ts",
-        "3. +page.server.ts",
-        "4. +server.ts",
-        "5. +layout.svelte",
-        "6. +layout.ts",
-        "7. +layout.server.ts",
-        "8. +error.svelte",
-    })
+    local filename_index = 0
 
     if filename == nil then
+        filename_index = vim.fn.inputlist(options)
         filename = M._config["route_filetypes"][filename_index]
     end
 
@@ -114,7 +144,7 @@ M.create_route = function(args)
         end
     end
 
-    create_file(svelte_root .. route, filename)
+    create_file(svelte_root .. "/" .. route, filename)
 end
 
 M.setup = function(opts)
@@ -122,14 +152,18 @@ M.setup = function(opts)
         opts = M._default_config
     end
 
+    M._templates = require("nvimkit.templates")
+
     M._config = merge_tables(M._default_config, opts)
 
-    -- TODO let users pass the route filetype and route name in the Ex function
-    vim.api.nvim_create_user_command("NvimkitCreateRoute", "lua require('nvimkit').create_route()",
-        { desc = "Create a new sveltkit route" })
-end
+    if M._config["ts_or_js"] == "ts" then
+        M._config["route_filetypes"] = M._tsFiletypes
+    else
+        M._config["route_filetypes"] = M._jsFiletypes
+    end
 
-M.setup()
-M.create_route()
+    vim.api.nvim_create_user_command("NvimkitCreateRoute", "lua require('nvimkit').create_route()",
+        { desc = "Create a new Sveltekit route" })
+end
 
 return M
