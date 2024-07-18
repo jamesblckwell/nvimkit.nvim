@@ -82,7 +82,7 @@ local create_file = function(path, route_file)
         return
     end
 
-    local template_set = M._templates[M._config["ts_or_js"]]
+    local template_set = M._templates[M._config["is_TS_project"]]
     local template = template_set[route_file]
     if template == nil then
         template = ""
