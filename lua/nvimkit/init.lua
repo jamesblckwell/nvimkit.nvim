@@ -30,7 +30,7 @@ M._default_config = {
     is_TS_project = true,
 }
 
-M._config = nil
+M._config = {}
 
 -- checks if the setup function has been called, by seeing if the
 -- _config variable is set
@@ -158,7 +158,7 @@ M.setup = function(opts)
 
     M._templates = require("nvimkit.templates")
 
-    M._config["is_TS_project"] = detectTS();
+    M._default_config["is_TS_project"] = detectTS();
 
     M._config = merge_tables(M._default_config, opts)
 
