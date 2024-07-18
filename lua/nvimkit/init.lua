@@ -1,8 +1,5 @@
 local M = {}
 
--- TODO - add ability to split buffer
--- TODO - add option to template the files?
-
 M._jsFiletypes = {
     "+page.svelte",
     "+page.js",
@@ -30,10 +27,10 @@ M._default_config = {
     svelte_route_dirname = "/src/routes",
     open_file_split_direction = "right",
     open_file_after_creation = true,
-    ts_or_js = "ts",
+    is_TS_project = true,
 }
 
-M._config = nil
+M._config = {}
 
 -- checks if the setup function has been called, by seeing if the
 -- _config variable is set
@@ -66,6 +63,13 @@ local generate_route_options = function()
     return options
 end
 
+-- Detect if the project is a typescript project
+local detectTS = function()
+    local cwd = vim.fn.getcwd();
+    local tsconfig = cwd .. "/tsconfig.json";
+    return file_exists(tsconfig);
+end
+
 local create_file = function(path, route_file)
     if check_dir_exists(path) == false then
         vim.fn.mkdir(path, "p")
@@ -78,7 +82,12 @@ local create_file = function(path, route_file)
         return
     end
 
-    local template_set = M._templates[M._config["ts_or_js"]]
+    local template_set = nil
+    if M._config["is_TS_project"] == true then
+        template_set = M._templates["ts"]
+    else
+        template_set = M._templates["js"]
+    end
     local template = template_set[route_file]
     if template == nil then
         template = ""
@@ -110,8 +119,8 @@ end
 
 M.create_route = function()
     local options = generate_route_options()
-
     local filename, route = nil, nil
+
     if check_setup() == false then
         print("Error: Setup not called")
         return
@@ -154,9 +163,11 @@ M.setup = function(opts)
 
     M._templates = require("nvimkit.templates")
 
+    M._default_config["is_TS_project"] = detectTS();
+
     M._config = merge_tables(M._default_config, opts)
 
-    if M._config["ts_or_js"] == "ts" then
+    if M._config["is_TS_project"] == "ts" then
         M._config["route_filetypes"] = M._tsFiletypes
     else
         M._config["route_filetypes"] = M._jsFiletypes
