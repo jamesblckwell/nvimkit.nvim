@@ -24,8 +24,11 @@ function. (See |nvimkit.setup|).
         The direction in which to open the file. Default is "right".
         See |:vsplit| and |:split| for more details.
 
-    ts_or_js: string {"ts" | "js"}
-        The file extension to use for the route files. Default is "ts".
+    is_TS_project: bool
+        The file extension to use for the route files. Nvimkit will attempt to  
+        determine this by looking for a `tsconfig.json` file in the project
+        root. Can be overridden during setup, just like everything else. 
+        Default is "ts".
 
     route_filetypes: table
         The filetypes that can be created for a route. See
