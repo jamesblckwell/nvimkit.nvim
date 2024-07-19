@@ -23,7 +23,6 @@ M._tsFiletypes = {
 }
 
 M._default_config = {
-    mode = "prod",
     svelte_route_dirname = "/src/routes",
     open_file_split_direction = "right",
     open_file_after_creation = true,
@@ -63,7 +62,6 @@ local generate_route_options = function()
     return options
 end
 
--- Detect if the project is a typescript project
 
 local create_file = function(path, route_file)
     if check_dir_exists(path) == false then
@@ -112,7 +110,7 @@ local create_file = function(path, route_file)
     end
 end
 
-
+-- Detect if the project is a typescript project
 M._detectTS = function()
     local cwd = vim.fn.getcwd();
     local tsconfig = cwd .. "/tsconfig.json";
