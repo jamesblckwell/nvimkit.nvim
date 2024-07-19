@@ -117,9 +117,9 @@ local create_file = function(path, route_file)
     end
 end
 
-M.create_route = function()
+M.create_route = function(filename, route)
     local options = generate_route_options()
-    local filename, route = nil, nil
+    print(filename, route)
 
     if check_setup() == false then
         print("Error: Setup not called")
@@ -142,7 +142,7 @@ M.create_route = function()
     end
 
     -- exit gracefully when a user doesn't select a filetype
-    if filename_index == 0 then
+    if filename == nil then
         return
     end
 
@@ -167,14 +167,28 @@ M.setup = function(opts)
 
     M._config = merge_tables(M._default_config, opts)
 
-    if M._config["is_TS_project"] == "ts" then
+    if M._config["is_TS_project"] == true then
         M._config["route_filetypes"] = M._tsFiletypes
     else
         M._config["route_filetypes"] = M._jsFiletypes
     end
 
-    vim.api.nvim_create_user_command("NvimkitCreateRoute", "lua require('nvimkit').create_route()",
-        { desc = "Create a new Sveltekit route" })
+    vim.api.nvim_create_user_command(
+        "NvimkitCreateRoute",
+        function(args)
+            M.create_route(args["fargs"][1], args["fargs"][2])
+        end,
+        {
+            nargs = "*",
+            complete = function(ArgLead, CmdLine, CursorPos)
+                -- only complete for the first argument
+                if CursorPos == 19 then
+                    return M._config["route_filetypes"]
+                end
+            end,
+            desc = "NvimkitCreateRoute <filetype> <route> - Create a new route file in the svelte routes directory"
+        }
+    )
 end
 
 return M
