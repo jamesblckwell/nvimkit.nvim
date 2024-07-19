@@ -64,11 +64,6 @@ local generate_route_options = function()
 end
 
 -- Detect if the project is a typescript project
-local detectTS = function()
-    local cwd = vim.fn.getcwd();
-    local tsconfig = cwd .. "/tsconfig.json";
-    return file_exists(tsconfig);
-end
 
 local create_file = function(path, route_file)
     if check_dir_exists(path) == false then
@@ -117,9 +112,15 @@ local create_file = function(path, route_file)
     end
 end
 
+
+M._detectTS = function()
+    local cwd = vim.fn.getcwd();
+    local tsconfig = cwd .. "/tsconfig.json";
+    return file_exists(tsconfig);
+end
+
 M.create_route = function(filename, route)
     local options = generate_route_options()
-    print(filename, route)
 
     if check_setup() == false then
         print("Error: Setup not called")
@@ -163,7 +164,7 @@ M.setup = function(opts)
 
     M._templates = require("nvimkit.templates")
 
-    M._default_config["is_TS_project"] = detectTS();
+    M._default_config["is_TS_project"] = M._detectTS();
 
     M._config = merge_tables(M._default_config, opts)
 
